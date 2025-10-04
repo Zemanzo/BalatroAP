@@ -3,11 +3,11 @@
 -- DebugPlus console
 local success, dpAPI = pcall(require, "debugplus-api")
 local logger = { -- Placeholder logger, for when DebugPlus isn't available
-    log = sendInfoMessage,
-    debug = sendDebugMessage,
-    info = sendInfogMessage,
-    warn = sendWarnMessage,
-    error = sendErrorMessage
+	log = sendInfoMessage,
+	debug = sendDebugMessage,
+	info = sendInfogMessage,
+	warn = sendWarnMessage,
+	error = sendErrorMessage,
 }
 
 G.AP.log = function(msg, level)
@@ -23,14 +23,15 @@ if success and dpAPI.isVersionCompatible(1) then
 	local debugplus = dpAPI.registerID("Archipelago")
 	G.AP.debugplus = debugplus
 	logger = debugplus.logger
-	
+
 	debugplus.addCommand({
 		name = "hint",
 		shortDesc = "Hint an AP Item.",
 		desc = "Hint an AP Item. Type the item's name or mouse over it while executing this command.",
-		exec = function (args, rawArgs, dp)
-		
-			if not G.APClient then return "You have to be connected to Archipelago for this command.", "ERROR" end
+		exec = function(args, rawArgs, dp)
+			if not G.APClient then
+				return "You have to be connected to Archipelago for this command.", "ERROR"
+			end
 			-- Hovered Item takes priotiry
 			if dp.hovered and dp.hovered.config and dp.hovered.config.center then
 				local center = dp.hovered.config.center
@@ -42,29 +43,28 @@ if success and dpAPI.isVersionCompatible(1) then
 					valid_sets.Spectral = true
 					valid_sets.Voucher = true
 					valid_sets.Booster = true
-					
+
 					if valid_sets[center.set] then
-					
-						if key == 'v_rand_ap_item' then
+						if key == "v_rand_ap_item" then
 							return "Can't hint AP Check.", "ERROR"
 						end
-						
+
 						if center.ap_unlocked then
 							return "Can't hint unlocked items.", "ERROR"
 						else
-							G.AP.last_message = "!hint "..center.name
-							G.APClient:Say("!hint "..center.name)
-							return 'Hinting "'..center.name..'"...', "INFO", {1, 0, 1}
+							G.AP.last_message = "!hint " .. center.name
+							G.APClient:Say("!hint " .. center.name)
+							return 'Hinting "' .. center.name .. '"...', "INFO", { 1, 0, 1 }
 						end
 					else
-						if center.key == 'c_base' then
-							if dp.hovered.facing == 'back' then
+						if center.key == "c_base" then
+							if dp.hovered.facing == "back" then
 								local center_back = G.GAME[dp.hovered.back]
 								if center_back.unlocked then
 									return "Can't hint unlocked items.", "ERROR"
 								else
-									G.APClient:Say("!hint "..center_back.name)
-									return "INFO", 'Hinting "'..center_back.name..'"...', "INFO", {1, 0, 1}
+									G.APClient:Say("!hint " .. center_back.name)
+									return "INFO", 'Hinting "' .. center_back.name .. '"...', "INFO", { 1, 0, 1 }
 								end
 							else
 								return "Hovering over an invalid item.", "ERROR"
@@ -77,27 +77,31 @@ if success and dpAPI.isVersionCompatible(1) then
 				end
 			-- Attempt to hint rawArgs if no hovered items.
 			elseif rawArgs and string.len(rawArgs) > 3 then
-				G.APClient:Say("!hint "..rawArgs)
-				return 'Hinting "'..rawArgs..'"... (Keep in mind, typed item names are not checked for validity!)', "INFO", {1, 0, 1}
+				G.APClient:Say("!hint " .. rawArgs)
+				return 'Hinting "' .. rawArgs .. '"... (Keep in mind, typed item names are not checked for validity!)',
+					"INFO",
+					{ 1, 0, 1 }
 			end
 			return "No item to hint.", "ERROR"
-		end
+		end,
 	})
-	
+
 	debugplus.addCommand({
 		name = "ap",
 		shortDesc = "Send a message to the Archipelago server.",
 		desc = 'Send a message to the Archipelago server. Can be used to execute commands: "ap !hint Joker"',
-		exec = function (args, rawArgs, dp)
-			if not G.APClient then return "You have to be connected to Archipelago for this command.", "ERROR" end
-			
+		exec = function(args, rawArgs, dp)
+			if not G.APClient then
+				return "You have to be connected to Archipelago for this command.", "ERROR"
+			end
+
 			if rawArgs and string.len(rawArgs) > 0 then
 				G.APClient:Say(rawArgs)
-				return "Message sent!", "INFO", {1, 0, 1}
+				return "Message sent!", "INFO", { 1, 0, 1 }
 			end
-			
+
 			return "Can't send blank message.", "ERROR"
-		end
+		end,
 	})
 end
 

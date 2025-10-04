@@ -19,8 +19,8 @@ match_indent=true
 target = 'game.lua'
 pattern = '''if G.FILE_HANDLER.run then'''
 position = "after"
-payload = '''if isAPProfileLoaded() then 
-	G.AP.server_save_run(G.ARGS.save_run) 
+payload = '''if isAPProfileLoaded() then
+	G.AP.server_save_run(G.ARGS.save_run)
 	G.SAVED_GAME = G.ARGS.save_run
 end'''
 match_indent=true
@@ -70,7 +70,7 @@ position = "before"
 payload = '''if isAPProfileLoaded() then
 	local pool_poll, pool_poll_key = get_current_pool(_pool_key, v.key)
 	if pool_poll[1] == "j_rand_fallback" then
-		v.mod = 0 
+		v.mod = 0
 	end
 end'''
 match_indent=true
