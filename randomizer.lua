@@ -1,13 +1,13 @@
 --- STEAMODDED HEADER
 --- MOD_NAME: Archipelago Randomizer
 --- MOD_ID: Rando
---- MOD_AUTHOR: [Burndi, SpaD_Overolls, Myst, Silvris]
+--- MOD_AUTHOR: [Burndi, SpaD_Overolls, Myst, Silvris, Zemanzo]
 --- MOD_DESCRIPTION: Archipelago Client for Balatro
 --- PRIORITY: 8000
 --- PREFIX: rand
 --- BADGE_COLOR: 4E8BE6
 --- DISPLAY_NAME: Archipelago
---- VERSION: 0.1.9e-indev-9
+--- VERSION: 0.2.0
 --- DEPENDENCIES: [Steamodded>=1.0.0~BETA-0302d]
 ----------------------------------------------
 ------------MOD CODE -------------------------
@@ -49,6 +49,12 @@ NFS.load(G.AP.this_mod.path .. "stake.lua")()
 NFS.load(G.AP.this_mod.path .. "UIdefinitions.lua")()
 NFS.load(G.AP.this_mod.path .. "atlas.lua")()
 NFS.load(G.AP.this_mod.path .. "modsupport.lua")()
+assert(SMODS.load_file("back.lua"))()
+assert(SMODS.load_file("hands.lua"))()
+assert(SMODS.load_file("ante.lua"))()
+assert(SMODS.load_file("ui/blind_selector.lua"))()
+assert(SMODS.load_file("ui/ap_shop.lua"))()
+assert(SMODS.load_file("ui/hands.lua"))()
 
 json = NFS.load(G.AP.this_mod.path .. "json.lua")()
 AP = require("lua-apclientpp")

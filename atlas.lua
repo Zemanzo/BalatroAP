@@ -7,6 +7,27 @@ SMODS.Atlas({
 })
 
 SMODS.Atlas({
+	key = "cardback",
+	path = "cardback.png",
+	px = 71,
+	py = 95,
+})
+
+SMODS.Atlas({
+	key = "apicon",
+	path = "apicon.png",
+	px = 22,
+	py = 22,
+})
+
+SMODS.Atlas({
+	key = "balatroicon",
+	path = "balatroicon.png",
+	px = 21,
+	py = 25,
+})
+
+SMODS.Atlas({
 	key = "ap_item_voucher",
 	path = "v_ap_item.png",
 	px = 71,

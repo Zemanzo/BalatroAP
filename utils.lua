@@ -36,3 +36,26 @@ function tableContains(table, value)
 	end
 	return false
 end
+
+table_contains = tableContains
+
+---Gets a node from a structured UI table
+---@param ui_table table
+---@param target number[] index per 'nodes'. can be negative: will search from the last element
+---@return nil | table
+function util_get_ui_node(ui_table, target)
+	local nodes = ui_table.nodes
+	for i, value in ipairs(target) do
+		local nodeIndex = value
+		if value < 0 then
+			nodeIndex = #nodes + value + 1
+		end
+		if nodes[nodeIndex] and nodes[nodeIndex].nodes then
+			nodes = nodes[nodeIndex].nodes
+		else
+			print("Element not found, got to index " .. i)
+			return nodes
+		end
+	end
+	return nodes
+end

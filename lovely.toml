@@ -3,6 +3,17 @@ version = "1.0.0"
 dump_lua = true
 priority = 0
 
+# add check before playing hand
+[[patches]]
+[patches.pattern]
+target = 'functions/state_events.lua'
+match_indent = true
+position = 'at'
+pattern = '''if not G.GAME.blind:debuff_hand(G.play.cards, poker_hands, text) then'''
+payload = '''if G.FUNCS.evaluate_play_precalculate(G.play.cards, poker_hands, text) then
+  print("Skipping normal play evaluation.")
+elseif not G.GAME.blind:debuff_hand(G.play.cards, poker_hands, text) then'''
+
 
 # disable SMODS save conversion for AP files
 [[patches]]
