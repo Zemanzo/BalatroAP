@@ -82,6 +82,7 @@ deck_list[11] = "Painted Deck"
 deck_list[12] = "Anaglyph Deck"
 deck_list[13] = "Plasma Deck"
 deck_list[14] = "Erratic Deck"
+deck_list[15] = "Archipelago Deck"
 
 G.AP.profile_Id = -1
 G.AP.GameObjectInit = false
@@ -623,6 +624,8 @@ function Game:init_item_prototypes()
 		G.PROFILES[G.AP.profile_Id]["vouchers"] = G.PROFILES[G.AP.profile_Id]["vouchers"] or {}
 		G.PROFILES[G.AP.profile_Id]["packs"] = G.PROFILES[G.AP.profile_Id]["packs"] or {}
 		G.PROFILES[G.AP.profile_Id]["consumables"] = G.PROFILES[G.AP.profile_Id]["consumables"] or {}
+		G.PROFILES[G.AP.profile_Id]["apdeck"] = G.PROFILES[G.AP.profile_Id]["apdeck"] or {}
+		G.PROFILES[G.AP.profile_Id]["poker_hands"] = G.PROFILES[G.AP.profile_Id]["poker_hands"] or {}
 
 		for k, v in pairs(G.AP.JokerQueue) do
 			G.PROFILES[G.AP.profile_Id]["jokers"][k] = true
@@ -642,6 +645,14 @@ function Game:init_item_prototypes()
 
 		for k, v in pairs(G.AP.ConsumableQueue) do
 			G.PROFILES[G.AP.profile_Id]["consumables"][k] = true
+		end
+
+		for k, v in pairs(G.AP.APDeckQueue) do
+			G.PROFILES[G.AP.profile_Id]["apdeck"][k] = true
+		end
+
+		for k, v in pairs(G.AP.PokerHandQueue) do
+			G.PROFILES[G.AP.profile_Id]["poker_hands"][k] = true
 		end
 
 		self.P_LOCKED = {}
@@ -693,7 +704,11 @@ function Game:init_item_prototypes()
 					end
 				end
 
-				if not tableContains(G.AP.slot_data.included_decks, k) and k ~= "b_challenge" then
+				if
+					not tableContains(G.AP.slot_data.included_decks, k)
+					and k ~= "b_rand_archipelago"
+					and k ~= "b_challenge"
+				then
 					SMODS.Back:take_ownership(k, {}):delete()
 				elseif not standard_deck and k ~= "b_challenge" then
 					standard_deck = k
@@ -875,23 +890,33 @@ function Game:init_item_prototypes()
 		-- Handle Queued Bonus stuff
 
 		for k, v in pairs(G.AP.BonusQueue) do
+			prefix = ""
+			if v.prefix then
+				prefix = v.prefix
+			end
+
 			if not G.PROFILES[G.AP.profile_Id]["received_indeces"][v.idx] then
 				if v.type == "bonusdiscards" then
-					G.PROFILES[G.AP.profile_Id]["bonusdiscards"] = (G.PROFILES[G.AP.profile_Id]["bonusdiscards"] or 0)
-						+ 1
+					G.PROFILES[G.AP.profile_Id][prefix .. "bonusdiscards"] = (
+						G.PROFILES[G.AP.profile_Id][prefix .. "bonusdiscards"] or 0
+					) + 1
 				elseif v.type == "bonusstartingmoney" then
-					G.PROFILES[G.AP.profile_Id]["bonusstartingmoney"] = (
-						G.PROFILES[G.AP.profile_Id]["bonusstartingmoney"] or 0
+					G.PROFILES[G.AP.profile_Id][prefix .. "bonusstartingmoney"] = (
+						G.PROFILES[G.AP.profile_Id][prefix .. "bonusstartingmoney"] or 0
 					) + 1
 				elseif v.type == "bonushands" then
-					G.PROFILES[G.AP.profile_Id]["bonushands"] = (G.PROFILES[G.AP.profile_Id]["bonushands"] or 0) + 1
+					G.PROFILES[G.AP.profile_Id][prefix .. "bonushands"] = (
+						G.PROFILES[G.AP.profile_Id][prefix .. "bonushands"] or 0
+					) + 1
 				elseif v.type == "bonushandsize" then
 					G.PROFILES[G.AP.profile_Id]["bonushandsize"] = (G.PROFILES[G.AP.profile_Id]["bonushandsize"] or 0)
 						+ 1
 				elseif v.type == "maxinterest" then
 					G.PROFILES[G.AP.profile_Id]["maxinterest"] = (G.PROFILES[G.AP.profile_Id]["maxinterest"] or 0) + 1
 				elseif v.type == "bonusjoker" then
-					G.PROFILES[G.AP.profile_Id]["bonusjoker"] = (G.PROFILES[G.AP.profile_Id]["bonusjoker"] or 0) + 1
+					G.PROFILES[G.AP.profile_Id][prefix .. "bonusjoker"] = (
+						G.PROFILES[G.AP.profile_Id][prefix .. "bonusjoker"] or 0
+					) + 1
 				elseif v.type == "bonusconsumable" then
 					G.PROFILES[G.AP.profile_Id]["bonusconsumable"] = (
 						G.PROFILES[G.AP.profile_Id]["bonusconsumable"] or 0
@@ -3100,6 +3125,7 @@ G.AP.localize_name = function(item_id, to_self)
 				"b_anaglyph",
 				"b_plasma",
 				"b_erratic",
+				"b_rand_archipelago",
 			}
 
 			for i = 1, #_back_keys do

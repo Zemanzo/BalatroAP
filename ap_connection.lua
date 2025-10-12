@@ -17,6 +17,7 @@ G.APItems = {
 	[G.AP.id_offset + 13] = "b_anaglyph",
 	[G.AP.id_offset + 14] = "b_plasma",
 	[G.AP.id_offset + 15] = "b_erratic",
+	[G.AP.id_offset + 711] = "b_rand_archipelago",
 
 	-- Jokers
 	[G.AP.id_offset + 16] = "j_joker",
@@ -349,6 +350,28 @@ G.APItems = {
 	[G.AP.id_offset + 386] = "bundle_spectral",
 	[G.AP.id_offset + 387] = "bundle_spectral",
 	[G.AP.id_offset + 388] = "bundle_spectral",
+
+	-- Poker hands
+	[G.AP.id_offset + 693] = "ph_high_card",
+	[G.AP.id_offset + 694] = "ph_pair",
+	[G.AP.id_offset + 695] = "ph_two_pair",
+	[G.AP.id_offset + 696] = "ph_three_of_a_kind",
+	[G.AP.id_offset + 697] = "ph_straight",
+	[G.AP.id_offset + 698] = "ph_flush",
+	[G.AP.id_offset + 699] = "ph_full_house",
+	[G.AP.id_offset + 700] = "ph_four_of_a_kind",
+	[G.AP.id_offset + 701] = "ph_straight_flush",
+	[G.AP.id_offset + 702] = "ph_five_of_a_kind",
+	[G.AP.id_offset + 703] = "ph_flush_house",
+	[G.AP.id_offset + 704] = "ph_flush_five",
+
+	-- Deck progression
+	[G.AP.id_offset + 705] = "d_progressive_card",
+	[G.AP.id_offset + 706] = "d_enable_interest",
+	[G.AP.id_offset + 707] = "d_progressive_money",
+	[G.AP.id_offset + 708] = "d_progressive_hands",
+	[G.AP.id_offset + 709] = "d_progressive_discards",
+	[G.AP.id_offset + 710] = "d_progressive_joker_slots",
 }
 
 -- joker bundle
@@ -664,6 +687,7 @@ function IsVanillaItem(key)
 			"b_anaglyph",
 			"b_plasma",
 			"b_erratic",
+			"b_rand_archipelago",
 			"b_challenge",
 		}
 
@@ -788,6 +812,8 @@ function APConnect()
 	G.AP.PackQueue = {}
 	G.AP.ConsumableQueue = {}
 	G.AP.StakeQueue = {}
+	G.AP.APDeckQueue = {}
+	G.AP.PokerHandQueue = {}
 
 	function on_socket_connected()
 		print("Socket connected")
@@ -868,7 +894,10 @@ function APConnect()
 						end
 					end
 				elseif G.P_CENTERS[item_key] then
+					print(item_key)
 					unlock_targets[#unlock_targets + 1] = G.P_CENTERS[item_key]
+				else
+					print("Could not find unlock for" .. item_key)
 				end
 
 				for i, item in pairs(unlock_targets) do
@@ -912,9 +941,11 @@ function APConnect()
 
 			-- failsave, because if item_key is unknown or was already received, item_id will be 0
 			if item_id ~= 0 then
+				local is_apdeck_specific_bonus = item_id >= 707 and item_id <= 710
+
 				-- unlock decks by adding their name to the list of backs (this backs list is only there in AP to keep track of unlocks):
 				-- same with jokers/vouchers
-				if item_id <= 15 then
+				if item_id <= 15 or item_id == 711 then
 					G.AP.log("received Deck")
 
 					-- different handling if item was received on startup (queue it)
@@ -965,14 +996,37 @@ function APConnect()
 					else
 						G.AP.ConsumableQueue[item_key] = item.index
 					end
+					-- Poker hands
+				elseif item_id >= 693 and item_id <= 704 then
+					G.AP.log("received Poker hand")
+					if G.AP.GameObjectInit then
+						G.PROFILES[G.AP.profile_Id]["received_indeces"][item.index] = true
+						G.PROFILES[G.AP.profile_Id]["poker_hands"][item_key] = true
+					else
+						G.AP.PokerHandQueue[item_key] = item.index
+					end
+					-- AP Deck
+				elseif item_id == 705 or item_id == 706 then
+					G.AP.log("received AP Deck improvement")
+					if G.AP.GameObjectInit then
+						G.PROFILES[G.AP.profile_Id]["received_indeces"][item.index] = true
+						G.PROFILES[G.AP.profile_Id]["consumables"][item_key] = true
+					else
+						G.AP.APDeckQueue[item_key] = item.index
+					end
 
 					-- Bonus Items
-				elseif item_id >= 300 and item_id < 330 then
-					if item_id == 301 then
+				elseif (item_id >= 300 and item_id < 330) or is_apdeck_specific_bonus then
+					local prefix = ""
+					if is_apdeck_specific_bonus then
+						prefix = "apdeck_"
+					end
+
+					if item_id == 301 or item_id == 709 then
 						if G.AP.GameObjectInit then
 							G.PROFILES[G.AP.profile_Id]["received_indeces"][item.index] = true
-							G.PROFILES[G.AP.profile_Id]["bonusdiscards"] = (
-								G.PROFILES[G.AP.profile_Id]["bonusdiscards"] or 0
+							G.PROFILES[G.AP.profile_Id][prefix .. "bonusdiscards"] = (
+								G.PROFILES[G.AP.profile_Id][prefix .. "bonusdiscards"] or 0
 							) + 1
 							if G.STAGE == G.STAGES.RUN then
 								G.GAME.round_resets.discards = G.GAME.round_resets.discards + 1
@@ -984,15 +1038,16 @@ function APConnect()
 							end
 						else
 							G.AP.BonusQueue[#G.AP.BonusQueue + 1] = {
+								prefix = prefix,
 								type = "bonusdiscards",
 								idx = item.index,
 							}
 						end
-					elseif item_id == 302 then
+					elseif item_id == 302 or item_id == 707 then
 						if G.AP.GameObjectInit then
 							G.PROFILES[G.AP.profile_Id]["received_indeces"][item.index] = true
-							G.PROFILES[G.AP.profile_Id]["bonusstartingmoney"] = (
-								G.PROFILES[G.AP.profile_Id]["bonusstartingmoney"] or 0
+							G.PROFILES[G.AP.profile_Id][prefix .. "bonusstartingmoney"] = (
+								G.PROFILES[G.AP.profile_Id][prefix .. "bonusstartingmoney"] or 0
 							) + 1
 
 							if G.STAGE == G.STAGES.RUN then
@@ -1008,11 +1063,12 @@ function APConnect()
 								idx = item.index,
 							}
 						end
-					elseif item_id == 303 then
+					elseif item_id == 303 or item_id == 708 then
 						if G.AP.GameObjectInit then
 							G.PROFILES[G.AP.profile_Id]["received_indeces"][item.index] = true
-							G.PROFILES[G.AP.profile_Id]["bonushands"] = (G.PROFILES[G.AP.profile_Id]["bonushands"] or 0)
-								+ 1
+							G.PROFILES[G.AP.profile_Id][prefix .. "bonushands"] = (
+								G.PROFILES[G.AP.profile_Id][prefix .. "bonushands"] or 0
+							) + 1
 							if G.STAGE == G.STAGES.RUN then
 								G.GAME.round_resets.hands = G.GAME.round_resets.hands + 1
 								ease_hands_played(1)
@@ -1070,11 +1126,12 @@ function APConnect()
 								idx = item.index,
 							}
 						end
-					elseif item_id == 306 then
+					elseif item_id == 306 or item_id == 710 then
 						if G.AP.GameObjectInit then
 							G.PROFILES[G.AP.profile_Id]["received_indeces"][item.index] = true
-							G.PROFILES[G.AP.profile_Id]["bonusjoker"] = (G.PROFILES[G.AP.profile_Id]["bonusjoker"] or 0)
-								+ 1
+							G.PROFILES[G.AP.profile_Id][prefix .. "bonusjoker"] = (
+								G.PROFILES[G.AP.profile_Id][prefix .. "bonusjoker"] or 0
+							) + 1
 							if G.STAGE == G.STAGES.RUN then
 								G.E_MANAGER:add_event(Event({
 									func = function()
@@ -1779,6 +1836,14 @@ function APConnect()
 							{
 								index = "erraticdeck",
 								item = 15 + G.AP.id_offset,
+							},
+						})
+					elseif item_id <= 527 then
+						deck_name = "b_rand_archipelago"
+						on_items_received({
+							{
+								index = "archipelagodeck",
+								item = 711 + G.AP.id_offset,
 							},
 						})
 					end

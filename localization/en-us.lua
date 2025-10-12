@@ -595,6 +595,8 @@ return {
 				"Beat #1# Decks on at least #3# difficulty (#2#/#1#)",
 				"Win with #1# Jokers on at least #3# difficulty (#2#/#1#)",
 				"Win with #1# unique combinations of Decks and Stakes (#2#/#1#)",
+				"Clear Challenges",
+				"Beat AP Deck",
 			},
 			k_ap_item_names = "AP Item Names",
 			k_ap_item_names_options = {

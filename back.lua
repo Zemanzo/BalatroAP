@@ -7,14 +7,36 @@ local function contains(table, element)
 	return false
 end
 
-UNLOCKED_CARDS = { 1, 2, 3, 4 }
+UNLOCKED_CARDS = { 2, 3, 4 }
 
-SMODS.Back({
+local get_deck_config_from_profile = function(key)
+	if G.PROFILES[G.AP.profile_Id] then
+		local saved_value = G.PROFILES[G.AP.profile_Id][key]
+		if saved_value ~= nil then
+			return saved_value
+		end
+	end
+	return 0
+end
+
+local get_updated_deck_config = function()
+	return {
+		dollars = -4 + get_deck_config_from_profile("apdeck_bonusmoney"),
+		discards = -2 + get_deck_config_from_profile("apdeck_bonushands"),
+		hands = -3 + get_deck_config_from_profile("apdeck_bonusdiscards"),
+		joker_slot = -5 + get_deck_config_from_profile("apdeck_bonusjoker"),
+		no_interest = true,
+	}
+end
+
+print(G.P_CENTERS["b_red"] ~= nil)
+
+local apback = SMODS.Back({
 	name = "Archipelago Deck",
-	key = "apdeck",
+	key = "archipelago",
 	atlas = "cardback",
 	pos = { x = 0, y = 0 },
-	config = { dollars = -4, discards = -2, hands = 3, joker_slot = -4, no_interest = true },
+	config = get_updated_deck_config(),
 	loc_txt = {
 		name = "Archipelago Deck",
 		text = {
