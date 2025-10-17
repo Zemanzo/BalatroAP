@@ -114,6 +114,23 @@ payload = '''if isAPProfileLoaded() then
 end'''
 match_indent=true
 
+# resize run info & options button to fit custom shop button
+[[patches]]
+[patches.pattern]
+target = 'functions/UI_definitions.lua'
+pattern = '''{n=G.UIT.R, config={id = 'run_info_button', align = "cm", minh = 1.75, minw = 1.5,padding = 0.05, r = 0.1, hover = true, colour = G.C.RED, button = "run_info", shadow = true}, nodes={'''
+position = "at"
+payload = '''{n=G.UIT.R, config={id = 'run_info_button', align = "cm", minh = 1.25, minw = 1.5,padding = 0.05, r = 0.1, hover = true, colour = G.C.RED, button = "run_info", shadow = true}, nodes={'''
+match_indent=true
+
+[[patches]]
+[patches.pattern]
+target = 'functions/UI_definitions.lua'
+pattern = '''{n=G.UIT.R, config={align = "cm", minh = 1.75, minw = 1.5,padding = 0.05, r = 0.1, hover = true, colour = G.C.ORANGE, button = "options", shadow = true}, nodes={'''
+position = "at"
+payload = '''{n=G.UIT.R, config={align = "cm", minh = 1.25, minw = 1.5,padding = 0.05, r = 0.1, hover = true, colour = G.C.ORANGE, button = "options", shadow = true}, nodes={'''
+match_indent=true
+
 # DEBUG, REMOVE LINES BELOW ON RELEASE
 # Remove wait for intro animations
 [[patches]]

@@ -75,16 +75,19 @@ end
 function create_UIBox_ap_shop()
 	local first_row = {}
 	for i = 1, 10, 1 do
-		table.insert(first_row, ap_createShopItem())
+		table.insert(first_row, ap_createShopItem(i))
 	end
 	local second_row = {}
 	for i = 1, 10, 1 do
-		table.insert(second_row, ap_createShopItem())
+		table.insert(second_row, ap_createShopItem(i + 2))
 	end
 	local third_row = {}
 	for i = 1, 10, 1 do
-		table.insert(third_row, ap_createShopItem())
+		table.insert(third_row, ap_createShopItem(i + 4))
 	end
+
+	play_sound("whoosh1", math.random() * 0.1 + 0.3, 0.3)
+	play_sound("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.6, 0.65)
 
 	return (
 		create_UIBox_generic_options({
@@ -134,76 +137,78 @@ function create_UIBox_ap_shop()
 	)
 end
 
-function ap_createShopItem()
-	local price = math.random(1, 999)
-	local ap_icon = Sprite(0, 0, 1, 1, G.ASSET_ATLAS[G.AP.this_mod.prefix .. "_apicon"], { x = 0, y = 0 })
-	ap_icon:define_draw_steps({
-		{ shader = "dissolve", shadow_height = 0.05 },
-		{ shader = "dissolve" },
-	})
-	ap_icon.states.drag.can = false
+SMODS.Voucher({
+	key = "ap_shop_item",
+	set = "Voucher",
+	name = "Shop Item",
+	atlas = "ap_item_voucher",
+	unlocked = true,
+	discovered = true,
+	cost = 3,
+	requires = { "fuck!! shit!!!! (put here anything so it doesnt spawn naturally)" },
+	in_pool = function(self)
+		return false
+	end,
+	config = {
+		extra = { id = 0 },
+	},
+	inject = function(self) -- prevent injection outside of AP
+		if isAPProfileLoaded() then
+			SMODS.Center.inject(self)
+		end
+	end,
+	set_ability = function()
+		print("hiya")
+	end,
+	set_sprites = function(self, card, card_table, other_card)
+		-- if card.ability and card.ability.extra and card.ability.extra.id ~= 0 then
+		-- 	if G.APClient ~= nil and not tableContains(G.APClient.missing_locations, card.ability.extra.id) then
+		-- 		card.children.center.atlas = G.ASSET_ATLAS["Tarot"]
+		-- 		card.children.center:set_sprite_pos({
+		-- 			x = 6,
+		-- 			y = 2,
+		-- 		})
+		-- 	end
+		-- end
+	end,
+})
 
-	-- local area = G.shop_jokers
-	-- local _center = {order = 1, discovered = false, cost = 3, consumeable = true, name = "The Fool", pos = {x=0,y=0}, set = "Tarot", effect = "Disable Blind Effect", cost_mult = 1.0, config = {}}
-	-- local card = Card(area.T.x + area.T.w/2, area.T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, _center, {bypass_discovery_center = true, bypass_discovery_ui = true})
+function ap_createShopItem(delay)
+	local card_area = CardArea(
+		G.hand.T.x + 0,
+		G.hand.T.y + G.ROOM.T.y + 9,
+		2.1 * G.CARD_W,
+		1.05 * G.CARD_H,
+		{ card_limit = 1, type = "shop", highlight_limit = 1 }
+	)
 
-	-- local t1 = {
-	--     n=G.UIT.ROOT, config = {minw = 0.6, align = 'tm', colour = darken(G.C.BLACK, 0.2), shadow = true, r = 0.05, padding = 0.05, minh = 1}, nodes={
-	--         {n=G.UIT.R, config={align = "cm", colour = lighten(G.C.BLACK, 0.1), r = 0.1, minw = 1, minh = 0.55, emboss = 0.05, padding = 0.03}, nodes={
-	--           {n=G.UIT.O, config={object = DynaText({string = {{prefix = localize('$')..price, ref_value = 'cost'}}, colours = {G.C.MONEY},shadow = true, silent = true, bump = true, pop_in = 0, scale = 0.5})}},
-	--         }}
-	--     }}
+	if G.P_CENTERS["v_rand_ap_item"] == nil then
+		print("Cry about it")
+	end
 
-	return {
-		n = G.UIT.C,
-		config = { align = "cm", padding = 0.1, w = 3 },
-		nodes = {
-			{
-				n = G.UIT.C,
-				config = {
-					align = "cm",
-					padding = 0.1,
-					w = 2.9,
-					r = 1,
-					colour = lighten(G.C.JOKER_GREY, 0.5),
-					shadow = true,
-				},
-				nodes = {
-					{
-						n = G.UIT.C,
-						config = { align = "cm", padding = 0.1, w = 2.8, r = 1, colour = lighten(G.C.BLACK, 0.1) },
-						nodes = {
-							{
-								n = G.UIT.R,
-								config = { align = "cm" },
-								nodes = {
-									{ n = G.UIT.O, config = { w = 1, h = 1, object = ap_icon } },
-								},
-							},
-							{
-								n = G.UIT.R,
-								config = { align = "cm" },
-								nodes = {
-									-- {n=G.UIT.T, config={text = "Cost: ", scale = 0.4, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
-									{
-										n = G.UIT.O,
-										config = {
-											object = DynaText({
-												string = localize("$") .. price,
-												colours = { G.C.MONEY },
-												rotate = true,
-												bump = true,
-												silent = true,
-												scale = 0.4,
-											}),
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
+	local card = Card(
+		card_area.T.x + card_area.T.w / 2,
+		card_area.T.y,
+		G.CARD_W,
+		G.CARD_H,
+		G.P_CARDS.empty,
+		G.P_CENTERS["v_rand_ap_item"],
+		{ bypass_discovery_center = true, bypass_discovery_ui = true }
+	)
+	card.shop_voucher = true
+	card.states.visible = false
+
+	G.E_MANAGER:add_event(Event({
+		trigger = "after",
+		delay = 0.05 * delay,
+		blocking = false,
+		blockable = false,
+		func = function()
+			create_shop_card_ui(card)
+			card:start_materialize(nil, true)
+			return true
+		end,
+	}))
+
+	return { n = G.UIT.O, config = { object = card } }
 end
