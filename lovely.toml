@@ -113,3 +113,37 @@ payload = '''if isAPProfileLoaded() then
 	end
 end'''
 match_indent=true
+
+# DEBUG, REMOVE LINES BELOW ON RELEASE
+# Remove wait for intro animations
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''delay = change_context == 'game' and 1.5 or 0,'''
+position = "at"
+payload = '''delay = 0,'''
+match_indent=true
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''delay = change_context == 'splash' and 1.8 or change_context == 'game' and 2 or 0.5,'''
+position = "at"
+payload = '''delay = 0,'''
+match_indent=true
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''delay = change_context == 'splash' and 4.05 or change_context == 'game' and 3 or 1.5,'''
+position = "at"
+payload = '''delay = 0,'''
+match_indent=true
+
+[[patches]]
+[patches.pattern]
+target = 'game.lua'
+pattern = '''delay(0.1 + (change_context == 'splash' and 2 or change_context == 'game' and 1.5 or 0))'''
+position = "at"
+payload = ''' '''
+match_indent=true

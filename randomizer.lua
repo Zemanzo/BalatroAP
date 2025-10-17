@@ -12,6 +12,10 @@
 ----------------------------------------------
 ------------MOD CODE -------------------------
 
+-- DEBUG
+G.SETTINGS.skip_splash = "Yes"
+-- END DEBUG
+
 G.AP = {
 	APAddress = "archipelago.gg",
 	APPort = 38281,
