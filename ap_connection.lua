@@ -1715,138 +1715,39 @@ function APConnect()
 							end
 						end
 					end
-				elseif item_id >= 400 then
+				elseif item_id >= 1000 then
 					local deck_name = ""
+					local deck_index = ""
 					local stake_name = ""
-					if item_id <= 407 then
-						deck_name = "b_red"
-						on_items_received({
-							{
-								index = "reddeck",
-								item = 1 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 415 then
-						deck_name = "b_blue"
-						on_items_received({
-							{
-								index = "bluedeck",
-								item = 2 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 423 then
-						deck_name = "b_yellow"
-						on_items_received({
-							{
-								index = "yellowdeck",
-								item = 3 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 431 then
-						deck_name = "b_green"
-						on_items_received({
-							{
-								index = "greendeck",
-								item = 4 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 439 then
-						deck_name = "b_black"
-						on_items_received({
-							{
-								index = "blackdeck",
-								item = 5 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 447 then
-						deck_name = "b_magic"
-						on_items_received({
-							{
-								index = "magicdeck",
-								item = 6 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 455 then
-						deck_name = "b_nebula"
-						on_items_received({
-							{
-								index = "nebuladeck",
-								item = 7 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 463 then
-						deck_name = "b_ghost"
-						on_items_received({
-							{
-								index = "ghostdeck",
-								item = 8 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 471 then
-						deck_name = "b_abandoned"
-						on_items_received({
-							{
-								index = "abandoneddeck",
-								item = 9 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 479 then
-						deck_name = "b_checkered"
-						on_items_received({
-							{
-								index = "checkdeck",
-								item = 10 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 487 then
-						deck_name = "b_zodiac"
-						on_items_received({
-							{
-								index = "zodiacdeck",
-								item = 11 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 495 then
-						deck_name = "b_painted"
-						on_items_received({
-							{
-								index = "painteddeck",
-								item = 12 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 503 then
-						deck_name = "b_anaglyph"
-						on_items_received({
-							{
-								index = "anaglyphdeck",
-								item = 13 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 511 then
-						deck_name = "b_plasma"
-						on_items_received({
-							{
-								index = "plasmadeck",
-								item = 14 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 519 then
-						deck_name = "b_erratic"
-						on_items_received({
-							{
-								index = "erraticdeck",
-								item = 15 + G.AP.id_offset,
-							},
-						})
-					elseif item_id <= 527 then
-						deck_name = "b_rand_archipelago"
-						on_items_received({
-							{
-								index = "archipelagodeck",
-								item = 711 + G.AP.id_offset,
-							},
-						})
-					end
+					local deck_table = {
+						{ deck_name = "b_red", deck_index = "reddeck" },
+						{ deck_name = "b_blue", deck_index = "bluedeck" },
+						{ deck_name = "b_yellow", deck_index = "yellowdeck" },
+						{ deck_name = "b_green", deck_index = "greendeck" },
+						{ deck_name = "b_black", deck_index = "blackdeck" },
+						{ deck_name = "b_magic", deck_index = "magicdeck" },
+						{ deck_name = "b_nebula", deck_index = "nebuladeck" },
+						{ deck_name = "b_ghost", deck_index = "ghostdeck" },
+						{ deck_name = "b_abandoned", deck_index = "abandoneddeck" },
+						{ deck_name = "b_checkered", deck_index = "checkdeck" },
+						{ deck_name = "b_zodiac", deck_index = "zodiacdeck" },
+						{ deck_name = "b_painted", deck_index = "painteddeck" },
+						{ deck_name = "b_anaglyph", deck_index = "anaglyphdeck" },
+						{ deck_name = "b_plasma", deck_index = "plasmadeck" },
+						{ deck_name = "b_erratic", deck_index = "erraticdeck" },
+						{ deck_name = "b_rand_archipelago", deck_index = "archipelagodeck" },
+					}
+
+					local deck_i = math.floor(item_id - 1000 / 8) + 1
+					deck_name = deck_table[deck_i].deck_name
+					deck_index = deck_table[deck_i].deck_index
+
+					on_items_received({
+						{
+							index = deck_index,
+							item_received = deck_i + G.AP.id_offset,
+						},
+					})
 
 					if item_id % 8 == 0 then
 						stake_name = "stake_white"

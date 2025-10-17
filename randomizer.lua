@@ -2422,6 +2422,37 @@ function get_shop_location(_pool_length)
 	return nil
 end
 
+local scout_for_current_locations = function()
+	local deck_name = G.GAME.selected_back.name
+	print("looking for " .. deck_name)
+
+	if G.GAME.round_resets.ante >= 1 and G.GAME.round_resets.ante <= 8 then
+		for k, v in pairs(deck_list) do
+			if deck_name == v then
+				for i = 0, 2, 1 do
+					local location_id = G.AP.id_offset
+						-- Start of ids for this deck is the sum of all preceding locations
+						+ (64 * 3 * k)
+						-- Add locations of previous ante
+						+ (G.GAME.round_resets.ante - 1) * 3
+						-- Add locations of previous stake
+						+ (G.P_CENTER_POOLS.Stake[G.GAME.stake].stake_level - 1) * 8 * 3
+						-- Do it for each blind
+						+ i
+					print("deck_name " .. deck_name)
+					print("location_id " .. location_id)
+					if G.AP.location_id_to_item_name[location_id] == nil then
+						G.APClient:LocationScouts({
+							location_id,
+						})
+					end
+				end
+				break -- break the loop once the correct deck is found
+			end
+		end
+	end
+end
+
 local select_blindRef = G.FUNCS.select_blind
 
 G.FUNCS.select_blind = function(e)
@@ -2430,19 +2461,7 @@ G.FUNCS.select_blind = function(e)
 		G.GAME.current_shop_check = get_shop_location()
 		local deck_name = G.GAME.selected_back.name
 
-		if G.GAME.round_resets.ante >= 1 and G.GAME.round_resets.ante <= 8 then
-			for k, v in pairs(deck_list) do
-				if deck_name == v then
-					G.APClient:LocationScouts({
-						G.AP.id_offset
-							+ (64 * k)
-							+ (G.GAME.round_resets.ante - 1) * 8
-							+ (G.P_CENTER_POOLS.Stake[G.GAME.stake].stake_level - 1),
-					})
-					break -- break the loop once the correct deck is found
-				end
-			end
-		end
+		scout_for_current_locations()
 	end
 
 	return select_blindRef(e)
@@ -2470,21 +2489,7 @@ function Game:start_run(args)
 
 		-- scout upcoming locations semi regularly
 		G.GAME.current_shop_check = get_shop_location()
-		local deck_name = G.GAME.selected_back.name
-
-		if G.GAME.round_resets.ante >= 1 and G.GAME.round_resets.ante <= 8 then
-			for k, v in pairs(deck_list) do
-				if deck_name == v then
-					G.APClient:LocationScouts({
-						G.AP.id_offset
-							+ (64 * k)
-							+ (G.GAME.round_resets.ante - 1) * 8
-							+ (G.P_CENTER_POOLS.Stake[G.GAME.stake].stake_level - 1),
-					})
-					break -- break the loop once the correct deck is found
-				end
-			end
-		end
+		scout_for_current_locations()
 	end
 end
 
