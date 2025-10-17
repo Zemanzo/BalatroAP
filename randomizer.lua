@@ -2760,7 +2760,7 @@ function check_for_unlock(args)
 				blind_id = 1
 			end
 
-			if ~G.AP.slot_data.only_boss_blinds_are_checks or blind_id == 2 then
+			if (not G.AP.slot_data.only_boss_blinds_are_checks) or blind_id == 2 then
 				for k, v in pairs(deck_list) do
 					if deck_name == v then
 						sendLocationCleared(
