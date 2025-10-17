@@ -2424,7 +2424,6 @@ end
 
 local scout_for_current_locations = function()
 	local deck_name = G.GAME.selected_back.name
-	print("looking for " .. deck_name)
 
 	if G.GAME.round_resets.ante >= 1 and G.GAME.round_resets.ante <= 8 then
 		for k, v in pairs(deck_list) do
@@ -2439,8 +2438,6 @@ local scout_for_current_locations = function()
 						+ (G.P_CENTER_POOLS.Stake[G.GAME.stake].stake_level - 1) * 8 * 3
 						-- Do it for each blind
 						+ i
-					print("deck_name " .. deck_name)
-					print("location_id " .. location_id)
 					if G.AP.location_id_to_item_name[location_id] == nil then
 						G.APClient:LocationScouts({
 							location_id,
@@ -2750,20 +2747,31 @@ local check_for_unlockRef = check_for_unlock
 function check_for_unlock(args)
 	local check_for_unlock = check_for_unlockRef(args)
 	if isAPProfileLoaded() then
-		-- ante up checks
-		if args.type == "ante_up" and args.ante and args.ante > 1 and args.ante < 10 then
-			-- when an ante is beaten
+		-- round win checks
+		if args.type == "round_win" then
+			local ante = G.GAME.round_resets.ante
 			local deck_name = G.GAME.selected_back.name
+			local blind_id = 0
+			local blind = G.GAME.blind:get_type()
 
-			for k, v in pairs(deck_list) do
-				if deck_name == v then
-					sendLocationCleared(
-						G.AP.id_offset
-							+ (64 * k)
-							+ (args.ante - 2) * 8
-							+ (G.P_CENTER_POOLS.Stake[G.GAME.stake].stake_level - 1)
-					)
-					break -- break the loop once the correct deck is found
+			if blind == "Boss" then
+				blind_id = 2
+			elseif blind == "Big" then
+				blind_id = 1
+			end
+
+			if ~G.AP.slot_data.only_boss_blinds_are_checks or blind_id == 2 then
+				for k, v in pairs(deck_list) do
+					if deck_name == v then
+						sendLocationCleared(
+							G.AP.id_offset
+								+ (64 * 3 * k)
+								+ (ante - 1) * 3
+								+ (G.P_CENTER_POOLS.Stake[G.GAME.stake].stake_level - 1) * 8 * 3
+								+ blind_id
+						)
+						break -- break the loop once the correct deck is found
+					end
 				end
 			end
 		end
@@ -2827,6 +2835,13 @@ function check_for_unlock(args)
 						end
 
 						G.PROFILES[G.AP.profile_Id].ap_progress = unique_wins
+					end
+				-- challenges
+				elseif G.AP.goal == 6 then
+					print("Goal not implemented, sorry!")
+				elseif G.AP.goal == 7 then
+					if args.type == "win" and G.GAME.selected_back.name == "Archipelago Deck" then
+						sendGoalReached()
 					end
 				end
 			end
